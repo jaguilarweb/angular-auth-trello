@@ -12,18 +12,29 @@ import { AuthService } from '@services/auth.service';
   templateUrl: './register-form.component.html',
 })
 export class RegisterFormComponent {
-  form = this.formBuilder.nonNullable.group({
-    name: ['', [Validators.required]],
+  formUser = this.formBuilder.nonNullable.group({
     email: ['', [Validators.email, Validators.required]],
-    password: ['', [Validators.minLength(8), Validators.required]],
-    confirmPassword: ['', [Validators.required]],
-  }, {
-    validators: [ CustomValidators.MatchValidator('password', 'confirmPassword') ]
   });
+
+  form = this.formBuilder.nonNullable.group(
+    {
+      name: ['', [Validators.required]],
+      email: ['', [Validators.email, Validators.required]],
+      password: ['', [Validators.minLength(8), Validators.required]],
+      confirmPassword: ['', [Validators.required]],
+    },
+    {
+      validators: [
+        CustomValidators.MatchValidator('password', 'confirmPassword'),
+      ],
+    }
+  );
   status: RequestStatus = 'init';
+  statusUser: RequestStatus = 'init';
   faEye = faEye;
   faEyeSlash = faEyeSlash;
   showPassword = false;
+  showRegister = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -35,18 +46,45 @@ export class RegisterFormComponent {
     if (this.form.valid) {
       this.status = 'loading';
       const { name, email, password } = this.form.getRawValue();
-      this.authService.register(name, email, password)
-      .subscribe({
+      this.authService.register(name, email, password).subscribe({
         next: () => {
           this.status = 'success';
           this.router.navigate(['/login']);
         },
         error: () => {
           this.status = 'failed';
-        }
-      })
+        },
+      });
     } else {
       this.form.markAllAsTouched();
+    }
+  }
+
+  validateUser() {
+    if (this.formUser.valid) {
+      this.statusUser = 'loading';
+      const { email } = this.formUser.getRawValue();
+      this.authService.isAvailable(email).subscribe({
+        next: (rta) => {
+          this.statusUser = 'success';
+          if(rta.isAvailable){
+            this.showRegister = true;
+            this.form.controls.email.setValue(email);
+          }else {
+            this.router.navigate(['/login'], {
+              queryParams: {
+                email
+              }
+            });
+          }
+        },
+        error: (error) => {
+          this.statusUser = 'failed';
+          console.log(error);
+        },
+      });
+    } else {
+      this.formUser.markAllAsTouched();
     }
   }
 }
