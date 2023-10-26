@@ -8,6 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { AuthService } from '@services/auth.service';
+import { TokenService } from '@services/token.service';
 //import { User } from '@models/user.model';
 
 @Component({
@@ -27,7 +28,8 @@ export class NavbarComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private tokenService: TokenService
   ) {}
 
 /*   ngOnInit(): void {
@@ -40,5 +42,9 @@ export class NavbarComponent {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  isValidToken(){
+    console.log(this.tokenService.isValidToken());
   }
 }
