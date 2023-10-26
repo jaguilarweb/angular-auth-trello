@@ -21,15 +21,22 @@ export class UsersTableComponent implements OnInit  {
   ) {}
 
   ngOnInit(): void {
-    this.userService.getUser()
+    this.getUsers();
+    /* this.userService.getUser()
     .subscribe(users => {
       this.dataSource.init(users);
-    })
+    }) */
     this.authService.user$
     .subscribe(user =>{
       this.user = user;
     })
+  }
 
+  getUsers() {
+    this.userService.getUser()
+    .subscribe(users => {
+      this.dataSource.init(users);
+    })
   }
 
 }

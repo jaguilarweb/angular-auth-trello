@@ -8,7 +8,7 @@ import jwtDecode, {JwtPayload} from 'jwt-decode';
 export class TokenService {
 
   constructor() { }
-
+// Access token
   saveToken(token: string){
     //Expires: Fecha de validez de la cookie, no del token.
     setCookie('token-trello', token, { expires: 365, path: '/'});
@@ -25,6 +25,36 @@ export class TokenService {
 
   isValidToken(){
     const token = this.getToken();
+    if(!token){
+      return false;
+    }
+    const decodeToken = jwtDecode<JwtPayload>(token);
+    if(decodeToken && decodeToken?.exp){
+      const tokenDate = new Date(0);
+      tokenDate.setUTCSeconds(decodeToken.exp);
+      const today = new Date();
+      return tokenDate.getTime() > today.getTime();
+    }
+    return false;
+  }
+
+  //Refresh token
+  saveRefreshToken(token: string){
+    //Expires: Fecha de validez de la cookie, no del token.
+    setCookie('refresh-token-trello', token, { expires: 365, path: '/'});
+  }
+
+  getRefreshToken(){
+    const token = getCookie('refresh-token-trello');
+    return token;
+  }
+
+  removeRefreshToken(){
+    removeCookie('refresh-token-trello');
+  }
+
+  isValidRefreshToken(){
+    const token = this.getRefreshToken();
     if(!token){
       return false;
     }
